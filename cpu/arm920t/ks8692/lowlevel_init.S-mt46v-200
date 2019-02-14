@@ -1,0 +1,228 @@
+/*
+ *  lowlevel_init.S - basic hardware initialization for the KS8692 CPU
+ *
+ *  Copyright (c) 2004-2005, Greg Ungerer <greg.ungerer@opengear.com>
+ *
+ * See file CREDITS for list of people who contributed to this
+ * project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ * MA 02111-1307 USA
+ */
+
+#include <config.h>
+#include <version.h>
+#include <asm/arch/platform.h>
+
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT
+
+/*
+ *************************************************************************
+ *
+ * Handy dandy macros
+ *
+ *************************************************************************
+ */
+
+/* Delay a bit */
+.macro DELAY_FOR cycles, reg0
+	ldr     \reg0, =\cycles
+	subs    \reg0, \reg0, #1
+	subne   pc,  pc, #0xc
+.endm
+
+/*
+ *************************************************************************
+ *
+ * Some local storage.
+ *
+ *************************************************************************
+ */
+
+/* Should we boot with an interactive console or not */
+.globl serial_console
+
+/*
+ *************************************************************************
+ *
+ * Raw hardware initialization code. The important thing is to get
+ * SDRAM setup and running. We do some other basic things here too,
+ * like getting the PLL set for high speed, and init the LEDs.
+ *
+ *************************************************************************
+ */
+
+.globl lowlevel_init
+lowlevel_init:
+	ldr	r1, =KS8692_IO_BASE+KS8692_DDR_MEM_CFG
+	ldr	r2, =0xf0198
+	str	r2, [r1]
+	ldr	r1, =KS8692_IO_BASE+KS8692_SYSTEM_BUS_CLOCK
+	ldr	r2, =IPSEC_CLOCK_200+CPU_CLOCK_250+MEM_CLOCK_200+SYSTEM_BUS_CLOCK_166	/* clock control */
+	str	r2, [r1]
+	ldr	r1, =KS8692_IO_BASE+KS8692_PLL_CTRL_DIAG
+	ldr	r2, =0x30040		/* jitter control */
+	str	r2, [r1]
+	/* init uart */
+	ldr	r1, =KS8692_IO_BASE+KS8692_UART1_LINE_CTRL
+	ldr	r2, =UART_LINEC_8DATA_BIT	/* 8,1,n */
+	str	r2, [r1]
+	ldr	r1, =KS8692_IO_BASE+KS8692_UART1_DIVISOR
+	ldr	r2, =25000000/115200
+	str	r2, [r1]
+	ldr	r1, =KS8692_IO_BASE+KS8692_UART1_MODEM_CTRL
+	ldr	r2, =UART_ENABLE+UART_OUT2_ASSERT_LOW+UART_OUT1_ASSERT_LOW
+	str	r2, [r1]
+
+	/*
+	 * setup DDR Timing according Denali
+	 */
+	ldr	r1, =(KS8692_IO_BASE+0x4000) /* reg 0 */
+	ldr	r2, =0x01010707
+	str	r2, [r1], #4
+	ldr	r2, =0x00010101			/* reg 1 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00080c00			/* reg 2 */
+	str	r2, [r1], #4
+	ldr	r2, =0x04000000			/* reg 3 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00011904			/* reg 4 */
+	str	r2, [r1], #4
+	ldr	r2, =0x01190404			/* reg 5 */
+	str	r2, [r1], #4
+	ldr	r2, =0x19040400			/* reg 6 */
+	str	r2, [r1], #4
+	ldr	r2, =0x04040001			/* reg 7 */
+	str	r2, [r1], #4
+	ldr	r2, =0x04000119			/* reg 8 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00011904			/* reg 9 */
+	str	r2, [r1], #4
+	ldr	r2, =0x01190404			/* reg 10 */
+	str	r2, [r1], #4
+	ldr	r2, =0x19040400			/* reg 11 */
+	str	r2, [r1], #4
+	ldr	r2, =0x04040001			/* reg 12 */
+	str	r2, [r1], #4
+	ldr	r2, =0x01000119			/* reg 13 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00000000			/* reg 14 */
+	str	r2, [r1], #4
+	ldr	r2, =0x03060602			/* reg 15 */
+	str	r2, [r1], #4
+	ldr	r2, =0x0d010202			/* reg 16 */
+	str	r2, [r1], #4
+	ldr	r2, =0x02020308			/* reg 17 */
+	str	r2, [r1], #4
+	ldr	r2, =0x0102000e			/* reg 18 */
+	str	r2, [r1], #4
+	ldr	r2, =0x24000000			/* reg 19 */
+	str	r2, [r1], #4
+	ldr	r2, =0x0001000f			/* reg 20 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00000000			/* reg 21 */
+	str	r2, [r1], #4
+	ldr	r2, =0x01000100			/* reg 22 */
+	str	r2, [r1], #4
+	ldr	r2, =0x01000000			/* reg 23 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00060303			/* reg 24 */
+	str	r2, [r1], #4
+	ldr	r2, =KS8692_DDR_ROW_COLON_CONF	/* reg 25 */
+	str	r2, [r1], #4
+	ldr	r2, =0x0c0c0c0c			/* reg 26 */
+	str	r2, [r1], #4
+	ldr	r2, =0x0a0a0a0a			/* reg 27 */
+	str	r2, [r1], #4
+	ldr	r2, =0x0000194d			/* reg 28 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 29 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 30 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 31 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 32 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 33 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 34 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 35 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00200020			/* reg 36 */
+	str	r2, [r1], #4
+	ldr	r2, =0x06120000			/* reg 37 */
+	str	r2, [r1], #4
+	ldr	r2, =0x000036a6			/* reg 38 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00000000			/* reg 39 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00000000			/* reg 40 */
+	str	r2, [r1], #4
+	ldr	r2, =KS8692_DDR_BUS_SIZE_CONF	/* reg 41 */
+	str	r2, [r1], #4
+	ldr	r2, =0x0000c800			/* reg 42 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00c8000f			/* reg 43 */
+	str	r2, [r1], #4
+	ldr	r2, =0x00000028			/* reg 44 */
+	str	r2, [r1], #4
+
+	ldr	r1, =(KS8692_IO_BASE+0x4038)
+	ldr	r2, =0x00000001		/* start DDR memory */
+	str	r2, [r1], #4
+/* end of DDR init */
+
+	/*
+	 * prepare to assign flash/io base address to PHYS_FLASH_1
+	 */
+	ldr	r1, =(KS8692_IO_BASE+KS8692_IO_BASE_CFG)
+	ldr	r2, =PHYS_FLASH_1
+
+	adr	r3, MAP_INSTRUC
+	ldr	r4, =0x04000000		/* somewhere in DDR RAM */
+	ldmia	r3, {r5-r6}
+	stmia	r4, {r5-r6}
+	adr	r10, JUMP_HERE
+	ldr	r0, =PHYS_FLASH_1	/* Flash starting addr */
+	add	r10, r10, r0
+	ldr	pc, =0x4000000		/* jump to DDR instruction */
+
+MAP_INSTRUC:
+	str	r2,[r1]
+	mov	pc, r10
+
+JUMP_HERE:
+/* back in flash in the final location */
+
+	ldr	r1, =KS8692_IO_BASE+KS8692_MEM_CTRL0
+	ldr	r2, =0x1fc00070		/* flash 8M */
+	str	r2, [r1]
+	ldr	r1, =KS8692_IO_BASE+KS8692_MEM_GENERAL
+	ldr	r2, =0x30000002		/* 16 bit device */
+	str	r2, [r1]
+
+/* Increase BogoMIPS to real CPU clock rate. */
+	mrc	p15, 0, r1, c1, c0, 0
+	ldr	r2, =0xC0000000
+	orr	r1, r1, r2
+	mcr	p15, 0, r1, c1, c0, 0
+
+	add	lr, lr, #PHYS_FLASH_1	/* flash is now mapped high */
+	add	ip, ip, #PHYS_FLASH_1	/* this is a hack */
+	mov	pc, lr			/* all done, return */
+
+#endif /* CONFIG_SKIP_LOWLEVEL_INIT */
