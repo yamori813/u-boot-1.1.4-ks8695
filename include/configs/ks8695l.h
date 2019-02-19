@@ -136,8 +136,8 @@
 #define CFG_MAX_FLASH_SECT	(160)	/* max number of sectors on one chip */
 
 /* timeout values are in ticks */
-#define CFG_FLASH_WRITE_TOUT	(CFG_HZ/2)	/* Timeout for Flash Write */
-#define CFG_FLASH_ERASE_TOUT	(CFG_HZ/2)	/* Timeout for Flash Erase */
+#define CFG_FLASH_WRITE_TOUT	(CFG_HZ)	/* Timeout for Flash Write */
+#define CFG_FLASH_ERASE_TOUT	(CFG_HZ)	/* Timeout for Flash Erase */
 
 
 #define	CONFIG_ETHADDR		00:10:A1:86:95:31
