@@ -49,6 +49,10 @@
 
 #define CFG_MALLOC_LEN		(CFG_ENV_SIZE + 128*1024)
 
+#define CONFIG_NETCONSOLE	/* include NetConsole support   */
+#define CONFIG_NET_MULTI	/* required for netconsole      */
+#define CONFIG_PREBOOT		"setenv stdout nc;setenv stdin nc"
+
 /*
  * Size of malloc() pool
  */
@@ -121,7 +125,7 @@
 #define PHYS_FLASH_SECT_SIZE    0x00010000 /* 64 KB sectors (x1) */
 
 #define CFG_FLASH_BASE		PHYS_FLASH_1
-#define	CFG_FLASH_SIZE		0x200000
+#define	CFG_FLASH_SIZE		0x100000
 
 /*-----------------------------------------------------------------------
  * FLASH and environment organization
@@ -136,14 +140,14 @@
 #define CFG_MAX_FLASH_SECT	(160)	/* max number of sectors on one chip */
 
 /* timeout values are in ticks */
-#define CFG_FLASH_WRITE_TOUT	(CFG_HZ/2)	/* Timeout for Flash Write */
-#define CFG_FLASH_ERASE_TOUT	(CFG_HZ/2)	/* Timeout for Flash Erase */
+#define CFG_FLASH_WRITE_TOUT	(CFG_HZ)	/* Timeout for Flash Write */
+#define CFG_FLASH_ERASE_TOUT	(CFG_HZ)	/* Timeout for Flash Erase */
 
 
 #define	CONFIG_ETHADDR		00:10:A1:86:95:31
-#define	CONFIG_IPADDR		192.168.1.200
+#define	CONFIG_IPADDR		10.10.10.202
 #define	CONFIG_NETMASK		255.255.255.0
-#define	CONFIG_SERVERIP 	192.168.1.11
+#define	CONFIG_SERVERIP 	10.10.10.3
 
 #define	CONFIG_AUTOSCRIPT	1
 #define	CONFIG_ENV_OVERWRITE

@@ -1701,6 +1701,9 @@ ks8695x_config	:	unconfig
 ks8695l_config	:	unconfig
 	@./mkconfig $(@:_config=) arm arm920t ks8695l micrel ks8695
 
+np-bbrm_config	:	unconfig
+	@./mkconfig $(@:_config=) arm arm920t ks8695l micrel ks8695
+
 ks8695v_run_config	\
 ks8695v_config	:	unconfig
 	@if [ "$(findstring _run_,$@)" ]; then \

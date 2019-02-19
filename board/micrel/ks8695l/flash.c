@@ -112,6 +112,9 @@ void flash_print_info  (flash_info_t *info)
     case (AMD_MANUFACT & FLASH_VENDMASK):
 	printf ("AMD ");
 	break;
+    case (MX_MANUFACT & FLASH_VENDMASK):
+	printf ("MX ");
+	break;
     case FLASH_MAN_STM:
 	printf ("ST ");
 	break;
@@ -127,6 +130,9 @@ void flash_print_info  (flash_info_t *info)
     case (AMD_ID_LV320B & FLASH_TYPEMASK):
 	printf ("Am29LV3200DB (32 Mbit, bottom boot block)\n");
 	break;
+    case (AMD_ID_LV800B & FLASH_TYPEMASK):
+	printf ("LV800DB (8 Mbit, bottom boot block)\n");
+	break;
     case FLASH_STM320DB:
 	printf ("M29W320DB (32 Mbit)\n");
 	break;
@@ -137,7 +143,7 @@ void flash_print_info  (flash_info_t *info)
 	printf ("M29W800DT (8 Mbit, top boot block)\n");
 	break;
     case HY_ID_VL160B:
-	printf ("HY29LV160 (8 Mbit, bottom boot block)\n");
+	printf ("HY29LV160 (16 Mbit, bottom boot block)\n");
 	break;
     default:
 	printf ("Unknown Chip Type\n");
@@ -186,6 +192,17 @@ static ulong flash_get_size (vu_char *addr, flash_info_t *info)
 	info->flash_id     = vendor << 16 | devid;
 	info->sector_count = 35;
 	info->size         = 0x200000;
+	info->start[0] = base;
+	info->start[1] = base + 0x4000;
+	info->start[2] = base + 0x4000 + 0x2000;
+	info->start[3] = base + 0x4000 + 0x2000 + 0x2000;
+	for (i = 4; i < info->sector_count; i++) {
+	    info->start[i] = base + (i-3) * 0x10000;
+	}
+    } else if ( devid == ( AMD_ID_LV800B & FLASH_TYPEMASK ) ) {
+	info->flash_id     = vendor << 16 | devid;
+	info->sector_count = 19;
+	info->size         = 0x100000;
 	info->start[0] = base;
 	info->start[1] = base + 0x4000;
 	info->start[2] = base + 0x4000 + 0x2000;
